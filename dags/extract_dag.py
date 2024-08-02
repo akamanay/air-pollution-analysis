@@ -1,6 +1,8 @@
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from airflow.utils.dates import days_ago
+import os
+import functools
 
 # Importing the task functions
 from extract.extract_data import extract_data
@@ -22,24 +24,26 @@ dag = DAG(
     catchup=False,
 )
 
+DATA_PATH = os.getenv('AIRFLOW_HOME') + '/data'
 # Define the tasks
 extract_demo = PythonOperator(
     task_id='extract_1',
-    python_callable=extract_data('data/Demographic_Data.csv', 'csv'),
+    python_callable=functools.partial(extract_data, DATA_PATH + '/Demographic_Data.csv', 'csv'),
     dag=dag,
 )
 
 extract_geo = PythonOperator(
     task_id='extract_2',
-    python_callable=extract_data('data/Geographic_Data.csv', csv),
+    python_callable=functools.partial(extract_data, DATA_PATH + '/Geographic_Data.csv', 'csv'),
     dag=dag,
 )
 
 extract_simple_api = PythonOperator(
     task_id='extract_3',
-    python_callable=extract_data('https://jsonplaceholder.typicode.com/posts', 'api'),
+    python_callable=functools.partial(extract_data, 'https://jsonplaceholder.typicode.com/posts', 'api'),
     dag=dag,
 )
 
 # Set the task dependencies
-[extract_demo, extract_geo, extract_simple_api] >> transform >> load
+#[extract_demo, extract_geo, extract_simple_api] >> transform >> load
+extract_demo >> extract_geo >> extract_simple_api
