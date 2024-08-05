@@ -2,6 +2,7 @@ import pandas as pd
 import requests
 import os
 from dotenv import load_dotenv
+import logging
 
 # Load environment variables
 load_dotenv()
@@ -22,7 +23,7 @@ def get_api_data(lon, lat):
         else:
             return None  # Return None if 'list' is empty or missing
     except requests.exceptions.RequestException as e:
-        print(f"Error fetching data for coordinates ({lon}, {lat}): {e}")
+        logging.error(f"Error fetching data for coordinates ({lon}, {lat}): {e}")
         return None
 
 def get_aqi_data(row):
@@ -75,6 +76,6 @@ def transform(demographic_data, geographic_data):
     # Concatenate the components DataFrame with the existing enriched data
     final_data = pd.concat([enriched_data, components_df], axis=1)
     
-    print("Data transformation complete.")
+    print("---> Data transformation complete.")
     
     return final_data
