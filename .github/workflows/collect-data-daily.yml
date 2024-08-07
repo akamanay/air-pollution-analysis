@@ -1,0 +1,49 @@
+name: Daily Workflow Run
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # at 06:00 AM UTC+3
+    #- cron: '0 18 * * *' # at 06:00 PM UTC+3
+
+jobs:
+  airflow_job:
+    runs-on: ubuntu-latest
+    env:
+      API_KEY: ${{secrets.API_KEY}}
+      AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
+      AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+      BUCKET_NAME: ${{vars.BUCKET_NAME}}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+          cache: 'pip' # caching pip dependencies
+
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
+
+      - name: Install dependences
+        run: pip install -r requirements.txt
+
+      - name: Set Airflow Home
+        run: echo "AIRFLOW_HOME=$(pwd)" >> $GITHUB_ENV
+
+      - name: Set Timezone
+        run: |
+          sudo timedatectl set-timezone Indian/Antananarivo
+          echo "AIRFLOW__CORE__DEFAULT_TIMEZONE=Indian/Antananarivo" >> $GITHUB_ENV
+          date -R
+
+      - name: Initialize airflow DB
+        run: airflow db init
+
+      - name: Reserialize dags
+        run: airflow dags reserialize
+
+      - name: Trigger test dag
+        run: airflow dags test etl_pipeline
+
+      - name: Show the runs
+        run: airflow dags list-runs -d etl_pipeline
