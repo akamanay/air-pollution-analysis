@@ -1,10 +1,9 @@
-name: Daily Workflow Run
+name: Get data Workflow Run
 
 on:
-  schedule:
-    - cron: '0 3 * * *' # at 06:00 AM UTC+3
-    #- cron: '0 18 * * *' # at 06:00 PM UTC+3
-
+  push:
+    branches:
+      - get-data
 jobs:
   airflow_job:
     runs-on: ubuntu-latest
@@ -13,6 +12,7 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
       AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
       BUCKET_NAME: ${{vars.BUCKET_NAME}}
+      LOCAL_DATETIME_ARRAY: ${{vars.LOCAL_DATETIME_ARRAY}}
     steps:
       - uses: actions/checkout@v4
 
@@ -42,6 +42,9 @@ jobs:
       - name: Reserialize dags
         run: airflow dags reserialize
 
+      - name: Show dags import errors
+        run: airflow dags list-import-errors
+       
       - name: Trigger test dag
         run: airflow dags test etl_pipeline
 

@@ -52,19 +52,24 @@ def create_file(dataframe, full_output_path):
         logging.error(f'An error occured while saving the file {filename}:\n   >>> {e.__cause__}')
         return False
         
-def load_to_csv(dataframe, output_path):
+def load_to_csv(dataframe, output_path, local_datetime=None):
     """
     Loads the transformed DataFrame into a CSV file with a dynamic filename.
 
     :param dataframe: pd.DataFrame, the DataFrame to be saved
     :param output_path: str, the base path for the output file
     """
+    
+    if local_datetime is None:
+        the_datetime = datetime.now()
+    else:
+        the_datetime = datetime.strptime(local_datetime, "%Y-%m-%d %H:%M")
 
     # Get the current datetime in YYYY-MM-DD-HH-MM format
-    current_date_time = datetime.now().strftime("%Y-%m-%d-T-%H-%M")
-
-    # Construct the filename with the current date
-    filename = f'weather-{current_date_time}.csv'
+    datetime_to_use = the_datetime.strftime("%Y-%m-%d-T-%H-%M")
+    
+    # Construct the filename with the datetime
+    filename = f'weather-{datetime_to_use}.csv'
 
     # Full path for the output file
     full_output_path = os.path.join(output_path, filename)
