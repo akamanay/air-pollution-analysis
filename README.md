@@ -30,3 +30,4 @@ You need to set up several environment variables to run this project. You can fi
 - **notebooks/**: Includes Jupyter notebooks for data analysis and visualization.
 - **.env.template**: A template for setting up the necessary environment variables.
 - **tasks/**: Python scripts for extracting, transforming, and loading data.
+- **requirements.txt**: Dependecies for the project
